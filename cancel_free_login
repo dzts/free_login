@@ -1,0 +1,25 @@
+#!/bin/sh
+
+getPublicKey(){
+	if [ ! -f ~/.ssh/id_rsa.pub ];then
+		echo "public key file is not exist!"
+    fi
+    publicKey=`cat ~/.ssh/id_rsa.pub`
+    if [ "$publicKey" ];then
+		echo "$publicKey"
+    else
+		echo "get ssh public key failed!"
+		exit
+	fi
+}
+
+publicKey="`getPublicKey`"
+
+if [ ! $1 ];then
+	echo "./cancel_free_login <username@host> <username@host> <username@host> ..."
+	exit
+fi
+
+for i in $@;do
+	ssh $i "sed -i \"s;$publicKey;;\" ~/.ssh/authorized_keys;"	
+done

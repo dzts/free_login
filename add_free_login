@@ -1,0 +1,34 @@
+#!/bin/sh
+
+
+getPublicKey(){
+	if [ ! -f ~/.ssh/id_rsa.pub ];then
+		ssh-keygen
+    fi
+    publicKey=`cat ~/.ssh/id_rsa.pub`
+    if [ "$publicKey" ];then
+		echo "$publicKey"
+    else
+		echo "get ssh public key failed!"
+		exit
+	fi
+}
+
+publicKey="`getPublicKey`"
+
+if [ ! $1 ];then
+	echo "./add_free_login <username@host> <username@host> <username@host> ..."
+	exit
+fi
+
+for i in $@;do
+
+	ssh $i "\
+		if [ ! -f ~/.ssh/authorized_keys ] || [ \`cat ~/.ssh/authorized_keys | grep \"$publicKey\" | wc -l\` == "0" ];then \
+	  		echo $publicKey >> ~/.ssh/authorized_keys;\
+	  		echo \"add free login success!\";\
+		else\
+	  		echo \"free login have supported!\";\
+		fi"
+
+done
